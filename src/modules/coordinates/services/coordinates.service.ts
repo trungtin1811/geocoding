@@ -51,13 +51,13 @@ export class CoordinatesService {
   async import(file: Express.Multer.File) {
     try {
       const formers = await this.coordinateModel.find().exec();
-      if (formers) {
+      if (formers.length) {
         const result = await this.coordinateModel.deleteMany(formers).exec();
         if (!result.acknowledged) {
           Promise.reject();
         }
       }
-
+      
       const content = await fs.promises.readFile(file.path, 'utf8');
       const lines = content.split('\n');
       lines.forEach((line, index) => {
