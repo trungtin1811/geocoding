@@ -50,17 +50,14 @@ export class CoordinatesService {
 
   async import(file: Express.Multer.File) {
     try {
-      const formers = await this.coordinateModel.find().exec();
-      if (formers.length) {
-        const result = await this.coordinateModel.deleteMany(formers).exec();
-        if (!result.acknowledged) {
-          Promise.reject();
-        }
+      const result = await this.coordinateModel.deleteMany({}).exec();
+      if (!result.acknowledged) {
+        Promise.reject();
       }
-      
+
       const content = await fs.promises.readFile(file.path, 'utf8');
       const lines = content.split('\n');
-      lines.forEach((line, index) => {
+      for await (const [index, line] of lines.entries()) {
         // Split the line into an array of values
         const values = line.split(';');
 
@@ -104,8 +101,8 @@ export class CoordinatesService {
 
         console.log(`Processing ${index}`);
         // Add the object to the array
-        this.coordinateModel.create(coordinate);
-      });
+        await this.coordinateModel.create(coordinate);
+      }
       return Promise.resolve();
     } catch (e) {
       return Promise.reject();
