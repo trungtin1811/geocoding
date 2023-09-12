@@ -7,7 +7,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import {
@@ -24,6 +31,19 @@ export class CoordinatesController {
   constructor(private readonly coordinatesService: CoordinatesService) {}
 
   @Get()
+  @ApiOkResponse({
+    type: PaginationResponse<Coordinate>,
+  })
+  @ApiQuery({
+    name: 'pageNumber',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
   getAll(
     @Query('pageNumber', {
       transform: (value) => Number(value ?? DEFAULT_PAGE_NUMBER),

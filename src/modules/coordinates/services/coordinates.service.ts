@@ -6,6 +6,7 @@ import {
   PaginationParams,
   PaginationResponse,
 } from 'src/modules/common/interfaces/pagination';
+import { parseDate } from 'src/modules/common/utils/parser';
 import { Coordinate } from '../interfaces/coordinates.schema';
 
 @Injectable()
@@ -57,17 +58,22 @@ export class CoordinatesService {
 
       const content = await fs.promises.readFile(file.path, 'utf8');
       const lines = content.split('\n');
+      const entriesCount = lines.length;
+      const coordinates: Coordinate[] = [];
+
       for await (const [index, line] of lines.entries()) {
         // Split the line into an array of values
         const values = line.split(';');
-
+        if (!values[0]) {
+          continue;
+        }
         // Create an object from the values
         const coordinate: Coordinate = {
           record: values[0],
           districtCode: values[1],
           propertyId: values[2],
-          saleCounter: values[3],
-          downloadTime: values[4],
+          saleCounter: Number(values[3]),
+          downloadTime: parseDate(values[4]),
           propertyName: values[5],
           unitNumber: values[6],
           houseNumber: values[7],
@@ -76,18 +82,18 @@ export class CoordinatesService {
           postcode: values[10],
           landSize: values[11],
           sizeMetric: values[12],
-          contractDate: values[13],
-          settlementDate: values[14],
+          contractDate: parseDate(values[13]),
+          settlementDate: parseDate(values[14]),
           salePrice: values[15],
           zoning: values[16],
           nature: values[17],
           purpose: values[18],
           strataLot: values[19],
           componentCode: values[20],
-          saleCode: values[21],
-          interestOfSale: values[22],
-          lat: values[23],
-          long: values[24],
+          saleCode: values[22],
+          interestOfSale: values[23],
+          lat: values[24],
+          long: values[25],
           address:
             (values[6] ? values[6] + '/' : '') +
             values[7] +
@@ -99,12 +105,16 @@ export class CoordinatesService {
             values[10],
         };
 
-        console.log(`Processing ${index}`);
+        console.log(`Processing ${(index / entriesCount) * 100}%`);
         // Add the object to the array
-        await this.coordinateModel.create(coordinate);
+        coordinates.push(coordinate);
       }
+
+      console.log(`Adding ${coordinates.length} document...`);
+      await this.coordinateModel.insertMany(coordinates);
       return Promise.resolve();
     } catch (e) {
+      console.log(e);
       return Promise.reject();
     }
   }

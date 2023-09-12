@@ -12,9 +12,9 @@ export class Coordinate {
   @Prop()
   propertyId: string;
   @Prop()
-  saleCounter: string;
+  saleCounter: number;
   @Prop()
-  downloadTime: string;
+  downloadTime: Date;
   @Prop()
   propertyName: string;
   @Prop()
@@ -32,9 +32,9 @@ export class Coordinate {
   @Prop()
   sizeMetric: string;
   @Prop()
-  contractDate: string;
+  contractDate: Date;
   @Prop()
-  settlementDate: string;
+  settlementDate: Date;
   @Prop()
   salePrice: string;
   @Prop()
